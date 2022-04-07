@@ -29,3 +29,15 @@ export function createCutImg() {
   }
   return cutImg
 }
+type Vector=number[]
+export function getVectorLength(vector: Vector) {
+  return Math.sqrt(vector.reduce((pre, cur) => pre + cur ** 2, 0))
+}
+function sum(vector: Vector) {
+  return vector.reduce((pre, cur) => pre + cur, 0)
+}
+export function getProjectionLength(vector: Vector, targetVector: Vector) {
+  const vectorLength = getVectorLength(vector)
+  const targetVectorLength = getVectorLength(targetVector)
+  return sum(vector) / (vectorLength * targetVectorLength)
+}

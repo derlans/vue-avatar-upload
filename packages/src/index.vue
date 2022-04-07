@@ -10,19 +10,21 @@
     </div>
     <div class="avatar-upload-main">
       <div ref="editBox" class="avatar-upload-edit" :style="editBoxSize">
-        <div class="avatar-upload-edit-fade" />
-        <div ref="selsct" class="avatar-upload-edit-select border-3-white" :style="selectStyle">
-          <img :src="Props.avatar" alt="" :style="imgStyle" class="avatar-upload-edit-select-img" @dragstart.prevent="">
-          <span class="select-zoom-point" />
+        <div class="edit-fade" />
+        <div ref="selsct" class="edit-select" :style="selectBoxStyle">
+          <span class="edit-selcet-img-box border-3-white">
+            <img :src="Props.avatar" alt="" :style="imgStyle" class="edit-select-img" @dragstart.prevent="">
+          </span>
+          <span ref="resize" class="select-zoom-point" />
         </div>
-        <img ref="avatar" :src="Props.avatar" alt="" :style="editStyle" class="avatar-upload-edit-bg" @dragstart.prevent="">
+        <img ref="avatar" :src="Props.avatar" alt="" :style="editStyle" class="edit-bg" @dragstart.prevent="">
       </div>
       <div class="avatar-upload-preview">
         <span>头像预览</span>
-        <div class="avatar-upload-preview-radius border-3-white">
+        <div class="preview-radius border-3-white">
           <img :src="Props.avatar" alt="" :style="imgStyle" @dragstart.prevent="">
         </div>
-        <div class="avatar-upload-preview-square">
+        <div class="preview-square">
           <img :src="Props.avatar" alt="" :style="imgStyle" @dragstart.prevent="">
         </div>
       </div>
@@ -32,10 +34,13 @@
 
 <script setup lang="ts" >
 import type { ComputedRef, Ref, StyleValue } from 'vue'
-import { computed, ref, toRaw } from 'vue'
-import { createCutImg } from './help'
+import { computed, reactive, ref, toRaw, watch } from 'vue'
+import { createCutImg, getProjectionLength } from './help'
 import { useDraggable } from './useDraggable'
-
+interface Size{
+  width: number
+  height: number
+}
 interface IProps{
   avatar?: string
   url?: string
@@ -44,6 +49,7 @@ interface IProps{
   headers?: Record<string, any>
   width?: number
   height?: number
+  selectSize?: Size
   withCredentials?: boolean
 }
 const Props = withDefaults(defineProps<IProps>(), {
@@ -51,6 +57,10 @@ const Props = withDefaults(defineProps<IProps>(), {
   width: 300,
   height: 300,
   withCredentials: false,
+  selectSize: () => ({
+    width: 100,
+    height: 100,
+  }),
 })
 const editBoxSize: ComputedRef<StyleValue> = computed(() => {
   return {
@@ -58,18 +68,23 @@ const editBoxSize: ComputedRef<StyleValue> = computed(() => {
     height: `${Props.height}px`,
   }
 })
+const selectBoxSize = reactive({
+  width: Props.selectSize.width,
+  height: Props.selectSize.height,
+})
 const selsct: Ref<HTMLElement| null> = ref(null)
 const editBox: Ref<HTMLElement| null> = ref(null)
 const avatar: Ref<HTMLElement| null> = ref(null)
-const { style: editPositionStyle, x: avatarX, y: avatarY } = useDraggable(editBox, {
-})
+const resize: Ref<HTMLElement| null> = ref(null)
+
+const { style: editPositionStyle, x: avatarX, y: avatarY } = useDraggable(editBox)
 const editStyle = computed(() => {
   return {
     ...toRaw(editBoxSize.value as object),
     ...toRaw(editPositionStyle.value as object),
   }
 })
-const { style: selectStyle, x: selectX, y: selectY } = useDraggable(selsct, {
+const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(selsct, {
   stop: true,
   range: {
     x: {
@@ -82,13 +97,33 @@ const { style: selectStyle, x: selectX, y: selectY } = useDraggable(selsct, {
     },
   },
 })
+const selectBoxStyle: ComputedRef<StyleValue> = computed(() => {
+  return {
+    width: `${selectBoxSize.width}px`,
+    height: `${selectBoxSize.height}px`,
+    ...selectPositionStyle.value as object,
+  }
+})
 const imgStyle: ComputedRef<StyleValue> = computed(() => {
   return {
     width: `${Props.width}px`,
     height: `${Props.height}px`,
-    left: `${avatarX.value - selectX.value}px`,
-    top: `${avatarY.value - selectY.value}px`,
+    left: `${avatarX.value - selectX.value - 3}px`,
+    top: `${avatarY.value - selectY.value - 3}px`,
   }
+})
+const { x: resizeX, y: resizeY } = useDraggable(resize, {
+  stop: true,
+  range: {
+  },
+})
+watch([resizeX, resizeY], (newV, oldV) => {
+  const sizeChangeX = newV[0] - oldV[0]
+  const sizeChangeY = newV[1] - oldV[1]
+  const sizeChange = parseFloat(getProjectionLength([sizeChangeX, sizeChangeY], [1, 1]).toFixed(1))
+
+  selectBoxSize.width = Math.abs(selectBoxSize.width + sizeChange)
+  selectBoxSize.height = Math.abs(selectBoxSize.height + sizeChange)
 })
 const cutImg = createCutImg()
 function getImgData() {
@@ -113,7 +148,7 @@ function getImgData() {
   padding: 5px 15px;
 }
 .border-3-white{
-  border: 3px solid#fff;
+  border: 2px solid#fff;
 }
 .avatar-upload-header{
   display: flex;
@@ -133,7 +168,7 @@ function getImgData() {
   cursor: move;
   margin-right: 10px;
 }
-.avatar-upload-edit-fade{
+.edit-fade{
   position: absolute;
   top: 0;
   left: 0;
@@ -142,15 +177,12 @@ function getImgData() {
   background-color: rgba(0, 0, 0, 0.6);
   z-index: 3;
 }
-.avatar-upload-edit-select{
+.edit-select{
   position: absolute;
-  width: 100px;
-  height: 100px;
   border-radius: 50%;
-  background-color: inherit!important;
-  overflow: hidden;
   cursor: move;
   z-index: 3;
+  box-sizing: border-box;
 }
 .select-zoom-point{
   position: absolute;
@@ -158,15 +190,25 @@ function getImgData() {
   height: 10px;
   background: #fff;
   border-radius: 50%;
-  left: 80%;
-  top: 87%;
+  left: 84%;
+  top: 84%;
+  cursor: se-resize;
 }
-.avatar-upload-edit-select-img{
-  user-select: none;
+.edit-selcet-img-box{
+  overflow: hidden;
   position: absolute;
   display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-sizing: border-box;
 }
-.avatar-upload-edit-bg{
+.edit-select-img{
+  user-select: none;
+  display: block;
+  position: absolute;
+}
+.edit-bg{
   user-select: none;
   display: block;
   position: absolute;
@@ -181,23 +223,23 @@ function getImgData() {
   background-color: #939393;
   padding: 10px;
 }
-.avatar-upload-preview-radius{
+.preview-radius{
   border-radius: 50%;
   overflow: hidden;
   height: 100px;
   width: 100px;
   position: relative;
 }
-.avatar-upload-preview-radius>img{
+.preview-radius>img{
   position: absolute;
 }
-.avatar-upload-preview-square{
+.preview-square{
   overflow: hidden;
   height: 100px;
   width: 100px;
   position: relative;
 }
-.avatar-upload-preview-square>img{
+.preview-square>img{
   position: absolute;
 }
 </style>
