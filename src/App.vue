@@ -10,12 +10,16 @@ const avatar = 'https://img.zcool.cn/community/01e5ed5d5fbc0ca8012187f4bfc51d.jp
 </template>
 
 <style>
+html{
+    background-color: rgb(151, 151, 151);
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+
 }
 * {
   margin: 0;
