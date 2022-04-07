@@ -9,24 +9,29 @@
       </div>
     </div>
     <div class="avatar-upload-main">
-      <div ref="editBox" class="avatar-upload-edit" :style="editBoxSize">
+      <div ref="editBox" class="avatar-upload-edit" :style="editBoxSizeStyle">
         <div class="edit-fade" />
         <div ref="selsct" class="edit-select" :style="selectBoxStyle">
           <span class="edit-selcet-img-box border-3-white">
-            <img :src="Props.avatar" alt="" :style="imgStyle" class="edit-select-img" @dragstart.prevent="">
+            <img :src="Props.avatar" alt="" :style="imgStyle" class="edit-select-img" @dragstart.prevent="" @select.prevent="">
           </span>
           <span ref="resize" class="select-zoom-point" />
         </div>
-        <img ref="avatar" :src="Props.avatar" alt="" :style="editStyle" class="edit-bg" @dragstart.prevent="">
+        <img ref="avatar" :src="Props.avatar" alt="" :style="editStyle" class="edit-bg" @dragstart.prevent="" @select.prevent="">
       </div>
       <div class="avatar-upload-preview">
         <span>头像预览</span>
         <div class="preview-radius border-3-white">
-          <img :src="Props.avatar" alt="" :style="imgStyle" @dragstart.prevent="">
+          <img :src="Props.avatar" alt="" :style="previewImgStyle" @dragstart.prevent="" @select.prevent="">
         </div>
         <div class="preview-square">
-          <img :src="Props.avatar" alt="" :style="imgStyle" @dragstart.prevent="">
+          <img :src="Props.avatar" alt="" :style="previewImgStyle" @dragstart.prevent="" @select.prevent="">
         </div>
+      </div>
+    </div>
+    <div class="avatar-upload-operation">
+      <div @click="updateRotate">
+        旋转90度
       </div>
     </div>
   </div>
@@ -37,10 +42,6 @@ import type { ComputedRef, Ref, StyleValue } from 'vue'
 import { computed, reactive, ref, toRaw, watch } from 'vue'
 import { createCutImg, getProjectionLength } from './help'
 import { useDraggable } from './useDraggable'
-interface Size{
-  width: number
-  height: number
-}
 interface IProps{
   avatar?: string
   url?: string
@@ -49,7 +50,7 @@ interface IProps{
   headers?: Record<string, any>
   width?: number
   height?: number
-  selectSize?: Size
+  selectSize?: number
   withCredentials?: boolean
 }
 const Props = withDefaults(defineProps<IProps>(), {
@@ -57,21 +58,19 @@ const Props = withDefaults(defineProps<IProps>(), {
   width: 300,
   height: 300,
   withCredentials: false,
-  selectSize: () => ({
-    width: 100,
-    height: 100,
-  }),
+  selectSize: 100,
 })
-const editBoxSize: ComputedRef<StyleValue> = computed(() => {
+const editBoxSizeStyle: ComputedRef<StyleValue> = computed(() => {
   return {
     width: `${Props.width}px`,
     height: `${Props.height}px`,
   }
 })
-const selectBoxSize = reactive({
-  width: Props.selectSize.width,
-  height: Props.selectSize.height,
-})
+const imgRotate = ref(0)
+function updateRotate() {
+  imgRotate.value = (imgRotate.value + 90) % 360
+}
+const selectBoxSize = ref(Props.selectSize)
 const selsct: Ref<HTMLElement| null> = ref(null)
 const editBox: Ref<HTMLElement| null> = ref(null)
 const avatar: Ref<HTMLElement| null> = ref(null)
@@ -80,27 +79,33 @@ const resize: Ref<HTMLElement| null> = ref(null)
 const { style: editPositionStyle, x: avatarX, y: avatarY } = useDraggable(editBox)
 const editStyle = computed(() => {
   return {
-    ...toRaw(editBoxSize.value as object),
+    ...toRaw(editBoxSizeStyle.value as object),
     ...toRaw(editPositionStyle.value as object),
+    transform: `rotate(${imgRotate.value}deg)`,
   }
 })
+const selsctRange = {
+  x: {
+    min: 0,
+    max: Props.width - selectBoxSize.value,
+  },
+  y: {
+    min: 0,
+    max: Props.height - selectBoxSize.value,
+  },
+}
+function updateSelsctRange() {
+  selsctRange.x.max = Props.width - selectBoxSize.value
+  selsctRange.y.max = Props.height - selectBoxSize.value
+}
 const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(selsct, {
   stop: true,
-  range: {
-    x: {
-      min: 0,
-      max: 200,
-    },
-    y: {
-      min: 0,
-      max: 200,
-    },
-  },
+  range: selsctRange,
 })
 const selectBoxStyle: ComputedRef<StyleValue> = computed(() => {
   return {
-    width: `${selectBoxSize.width}px`,
-    height: `${selectBoxSize.height}px`,
+    width: `${selectBoxSize.value}px`,
+    height: `${selectBoxSize.value}px`,
     ...selectPositionStyle.value as object,
   }
 })
@@ -110,20 +115,35 @@ const imgStyle: ComputedRef<StyleValue> = computed(() => {
     height: `${Props.height}px`,
     left: `${avatarX.value - selectX.value - 3}px`,
     top: `${avatarY.value - selectY.value - 3}px`,
+    transform: `rotate(${imgRotate.value}deg)`,
   }
 })
 const { x: resizeX, y: resizeY } = useDraggable(resize, {
   stop: true,
-  range: {
-  },
 })
+function updateSelsctSize() {
+  if (selectBoxSize.value + selectX.value > Props.width)
+    selectBoxSize.value = Props.width - selectX.value
+  if (selectBoxSize.value + selectY.value > Props.height)
+    selectBoxSize.value = Props.height - selectY.value
+}
 watch([resizeX, resizeY], (newV, oldV) => {
   const sizeChangeX = newV[0] - oldV[0]
   const sizeChangeY = newV[1] - oldV[1]
   const sizeChange = parseFloat(getProjectionLength([sizeChangeX, sizeChangeY], [1, 1]).toFixed(1))
-
-  selectBoxSize.width = Math.abs(selectBoxSize.width + sizeChange)
-  selectBoxSize.height = Math.abs(selectBoxSize.height + sizeChange)
+  selectBoxSize.value = Math.abs(selectBoxSize.value + sizeChange * 1.1)
+  updateSelsctSize()
+  updateSelsctRange()
+})
+const previewImgStyle: ComputedRef<StyleValue> = computed(() => {
+  const zoom = Props.selectSize / selectBoxSize.value
+  return {
+    width: `${Props.width * zoom}px`,
+    height: `${Props.height * zoom}px`,
+    left: `${(avatarX.value - selectX.value) * zoom}px`,
+    top: `${(avatarY.value - selectY.value) * zoom}px`,
+    transform: `rotate(${imgRotate.value}deg)`,
+  }
 })
 const cutImg = createCutImg()
 function getImgData() {
@@ -146,6 +166,7 @@ function getImgData() {
   border-radius: 10px;
   background-color: #fff;
   padding: 5px 15px;
+  user-select: none;
 }
 .border-3-white{
   border: 2px solid#fff;
