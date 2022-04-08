@@ -11,13 +11,14 @@
     <div class="avatar-upload-main">
       <div ref="editBox" class="avatar-upload-edit" :style="editBoxSizeStyle">
         <div class="edit-fade" />
-        <div ref="selsct" class="edit-select" :style="selectBoxStyle">
-          <span class="edit-selcet-img-box border-3-white">
-            <img :src="Props.avatar" alt="" :style="imgStyle" class="edit-select-img" @dragstart.prevent="" @select.prevent="">
+        <div ref="select" class="edit-select" :style="selectBoxStyle">
+          <span class="edit-selcet-img-box">
+            <img :src="Props.avatar" alt="" :style="selsctImgStyle" class="edit-select-img" @dragstart.prevent="" @select.prevent="">
           </span>
+          <span class="edit-selcet-border border-3-white" />
           <span ref="resize" class="select-zoom-point" />
         </div>
-        <img ref="avatar" :src="Props.avatar" alt="" :style="editStyle" class="edit-bg" @dragstart.prevent="" @select.prevent="">
+        <img ref="avatar" :src="Props.avatar" alt="" :style="bgImgStyle" class="edit-bg" @dragstart.prevent="" @select.prevent="">
       </div>
       <div class="avatar-upload-preview">
         <span>头像预览</span>
@@ -39,16 +40,23 @@
 
 <script setup lang="ts" >
 import type { ComputedRef, Ref, StyleValue } from 'vue'
-import { computed, reactive, ref, toRaw, watch } from 'vue'
-import { createCutImg, getProjectionLength } from './help'
-import { useDraggable } from './useDraggable'
+import { computed, reactive, ref, watch } from 'vue'
+import { createCutImg } from './help'
+import type { MRef, RefElement, Size, SizeStyle } from './type'
+import { useBackImgOperate, useSelectOperate } from './useOperate'
 interface IProps{
   avatar?: string
   url?: string
   field?: string
   params?: Record<string, any>
   headers?: Record<string, any>
+  /**
+   * @description 初始宽度
+   */
   width?: number
+  /**
+   * @description 初始长度
+   */
   height?: number
   selectSize?: number
   withCredentials?: boolean
@@ -60,104 +68,97 @@ const Props = withDefaults(defineProps<IProps>(), {
   withCredentials: false,
   selectSize: 100,
 })
-const editBoxSizeStyle: ComputedRef<StyleValue> = computed(() => {
-  return {
-    width: `${Props.width}px`,
-    height: `${Props.height}px`,
-  }
-})
-const imgRotate = ref(0)
-function updateRotate() {
-  imgRotate.value = (imgRotate.value + 90) % 360
+// 编辑框尺寸不是响应式的
+const { width: editBoxWidth, height: editBoxHeight, selectSize: initSelectSize } = Props
+// 编辑器尺寸style
+const editBoxSizeStyle: SizeStyle = {
+  width: `${editBoxWidth}px`,
+  height: `${editBoxHeight}px`,
 }
-const selectBoxSize = ref(Props.selectSize)
-const selsct: Ref<HTMLElement| null> = ref(null)
-const editBox: Ref<HTMLElement| null> = ref(null)
-const avatar: Ref<HTMLElement| null> = ref(null)
-const resize: Ref<HTMLElement| null> = ref(null)
-
-const { style: editPositionStyle, x: avatarX, y: avatarY } = useDraggable(editBox)
-const editStyle = computed(() => {
+// 图片尺寸 图片加载完之前默认为编辑器尺寸
+const imgSize: Size = reactive({
+  width: editBoxWidth,
+  height: editBoxHeight,
+})
+// 头像图片element
+const avatar: MRef<HTMLImageElement> = ref(null)
+// 图片改动就重置尺寸
+watch(avatar, () => {
+  if (avatar.value)
+    initImgSize()
+}, {
+  immediate: true,
+})
+// 把图片变为object-fit: cover;的形式 填充满不拉伸
+function initImgSize() {
+  const el = avatar.value
+  const width = el.naturalWidth
+  const height = el.naturalHeight
+  if (width / height > editBoxWidth / editBoxHeight) {
+    imgSize.height = editBoxHeight
+    imgSize.width = width * editBoxHeight / height
+  }
+  else {
+    imgSize.width = editBoxWidth
+    imgSize.height = height * editBoxWidth / width
+  }
+}
+// 编辑器最外层element 确定拖拽和滚动的范围
+const editBox: RefElement = ref(null)
+// 背景图片的操作 包括缩放、旋转、移动
+const {
+  bgImgZoom,
+  baImgX,
+  baImgY,
+  bgImgStyle,
+  imgRotate,
+  updateRotate,
+} = useBackImgOperate(editBox, imgSize)
+// 选择框
+const select: RefElement = ref(null)
+// 调整选择器大小按钮
+const resize: RefElement = ref(null)
+// 选择框的操作 包括缩放、移动
+const {
+  selectBoxSize,
+  selectBoxStyle,
+  selectX,
+  selectY,
+} = useSelectOperate(initSelectSize, select, resize, { width: editBoxWidth, height: editBoxHeight })
+// 选择框内图片的样式
+const selsctImgStyle: ComputedRef<StyleValue> = computed(() => {
   return {
-    ...toRaw(editBoxSizeStyle.value as object),
-    ...toRaw(editPositionStyle.value as object),
+    width: `${imgSize.width * bgImgZoom.value}px`,
+    height: `${imgSize.height * bgImgZoom.value}px`,
+    left: `${baImgX.value - selectX.value}px`,
+    top: `${baImgY.value - selectY.value}px`,
     transform: `rotate(${imgRotate.value}deg)`,
   }
 })
-const selsctRange = {
-  x: {
-    min: 0,
-    max: Props.width - selectBoxSize.value,
-  },
-  y: {
-    min: 0,
-    max: Props.height - selectBoxSize.value,
-  },
-}
-function updateSelsctRange() {
-  selsctRange.x.max = Props.width - selectBoxSize.value
-  selsctRange.y.max = Props.height - selectBoxSize.value
-}
-const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(selsct, {
-  stop: true,
-  range: selsctRange,
-})
-const selectBoxStyle: ComputedRef<StyleValue> = computed(() => {
-  return {
-    width: `${selectBoxSize.value}px`,
-    height: `${selectBoxSize.value}px`,
-    ...selectPositionStyle.value as object,
-  }
-})
-const imgStyle: ComputedRef<StyleValue> = computed(() => {
-  return {
-    width: `${Props.width}px`,
-    height: `${Props.height}px`,
-    left: `${avatarX.value - selectX.value - 3}px`,
-    top: `${avatarY.value - selectY.value - 3}px`,
-    transform: `rotate(${imgRotate.value}deg)`,
-  }
-})
-const { x: resizeX, y: resizeY } = useDraggable(resize, {
-  stop: true,
-})
-function updateSelsctSize() {
-  if (selectBoxSize.value + selectX.value > Props.width)
-    selectBoxSize.value = Props.width - selectX.value
-  if (selectBoxSize.value + selectY.value > Props.height)
-    selectBoxSize.value = Props.height - selectY.value
-}
-watch([resizeX, resizeY], (newV, oldV) => {
-  const sizeChangeX = newV[0] - oldV[0]
-  const sizeChangeY = newV[1] - oldV[1]
-  const sizeChange = parseFloat(getProjectionLength([sizeChangeX, sizeChangeY], [1, 1]).toFixed(1))
-  selectBoxSize.value = Math.abs(selectBoxSize.value + sizeChange * 1.1)
-  updateSelsctSize()
-  updateSelsctRange()
-})
+// 预览图片的样式
 const previewImgStyle: ComputedRef<StyleValue> = computed(() => {
-  const zoom = Props.selectSize / selectBoxSize.value
+  const zoom = (initSelectSize / selectBoxSize.value)
   return {
-    width: `${Props.width * zoom}px`,
-    height: `${Props.height * zoom}px`,
-    left: `${(avatarX.value - selectX.value) * zoom}px`,
-    top: `${(avatarY.value - selectY.value) * zoom}px`,
+    width: `${imgSize.width * zoom * bgImgZoom.value}px`,
+    height: `${imgSize.height * zoom * bgImgZoom.value}px`,
+    left: `${(baImgX.value - selectX.value) * zoom}px`,
+    top: `${(baImgY.value - selectY.value) * zoom}px`,
     transform: `rotate(${imgRotate.value}deg)`,
   }
 })
-const cutImg = createCutImg()
-function getImgData() {
-  return cutImg(Props.avatar, {
-    x: {
-      begin: 0,
-      end: 300,
-    },
-    y: {
-      begin: 0,
-      end: 300,
-    },
-  })
-}
+// const cutImg = createCutImg()
+// function getImgData() {
+//   return cutImg(Props.avatar, {
+//     x: {
+//       begin: 0,
+//       end: 300,
+//     },
+//     y: {
+//       begin: 0,
+//       end: 300,
+//     },
+//   })
+// }
 
 </script>
 
@@ -169,7 +170,7 @@ function getImgData() {
   user-select: none;
 }
 .border-3-white{
-  border: 2px solid#fff;
+  border: 3px solid#fff;
 }
 .avatar-upload-header{
   display: flex;
@@ -188,6 +189,7 @@ function getImgData() {
   position: relative;
   cursor: move;
   margin-right: 10px;
+  overflow: hidden;
 }
 .edit-fade{
   position: absolute;
@@ -203,7 +205,17 @@ function getImgData() {
   border-radius: 50%;
   cursor: move;
   z-index: 3;
+}
+/*  不要让选择框有边框 会影响计算位置 因此另外造一个当边框*/
+.edit-selcet-border{
+  position: absolute;
+  display: block;
+  width: calc(100% + 4px);
+  height:calc(100% + 4px);
+  border-radius: 50%;
   box-sizing: border-box;
+  top: -2px;
+  left: -2px;
 }
 .select-zoom-point{
   position: absolute;
@@ -220,9 +232,8 @@ function getImgData() {
   position: absolute;
   display: block;
   width: 100%;
-  height: 100%;
+  height:100%;
   border-radius: 50%;
-  box-sizing: border-box;
 }
 .edit-select-img{
   user-select: none;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AvatarUpload from '../packages/src/index.vue'
-const avatar = 'https://img.zcool.cn/community/01e5ed5d5fbc0ca8012187f4bfc51d.jpg@1280w_1l_2o_100sh.jpg'
+const avatar = 'https://scpic.chinaz.net/files/pic/pic6/pic1281.jpg'
 </script>
 
 <template>

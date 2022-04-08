@@ -1,5 +1,7 @@
-import type { ComputedRef, Ref, StyleValue } from 'vue'
-import { computed, ref, watch } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
+import { computed, ref } from 'vue'
+import type { PositionStyle } from './type'
+import { useEventListener } from './useEventListener'
 export interface UseDraggableOptions{
   draggingBox?: Ref<HTMLElement | SVGElement | Document | null>
   range?: {
@@ -58,22 +60,16 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     isDraging.value = false
     updateStartPostion(e)
   }
-  const style: ComputedRef<StyleValue> = computed(() => {
+  const style: ComputedRef<PositionStyle> = computed(() => {
     return {
       top: `${y.value}px`,
       left: `${x.value}px`,
     }
   })
-  watch(target, () => {
-    if (target.value) {
-      target.value.addEventListener('mousedown', start as any)
-      draggingBox.value!.addEventListener('mousemove', move as any)
-      draggingBox.value!.addEventListener('mouseup', end as any)
-    }
-  }
-  , {
-    immediate: true,
-  })
+  useEventListener(target, 'mousedown', start as any)
+  useEventListener(draggingBox, 'mousemove', move as any)
+  useEventListener(draggingBox, 'mouseup', end as any)
+
   return {
     x,
     y,
