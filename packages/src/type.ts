@@ -1,28 +1,5 @@
 import type { Ref } from 'vue'
-export interface AvatarUploadProps {
-  avatar?: string
-  url?: string
-  field?: string
-  headers?: Record<string, any>
-  data?: Record<string, any>
-  /**
-   * @description 初始宽度
-   */
-  width?: number
-  /**
-   * @description 初始长度
-   */
-  height?: number
-  selectSize?: number
-  withCredentials?: boolean
-  method?: 'post' | 'get'
-  accept?: string
-  customRequest?: (file: File) => void
-  befoureUpload?: (file: File) => boolean | Promise<boolean>
-  onSuccess?: (file: File, respose: any) => void
-  onError?: (file: File, err: Error) => void
-  onClose?: () => void
-}
+
 export interface Size{
   width: number
   height: number
