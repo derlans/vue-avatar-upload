@@ -2,9 +2,10 @@
   <div :class="{'avatar-upload-fade':Props.fixed}">
     <div :class="{'avatar-upload':true,'avatar-upload-fixed':Props.fixed}">
       <div class="avatar-upload-header">
-        <div class="avatar-upload-title">
+        <div v-if="!slots.title" class="avatar-upload-title">
           编辑头像
         </div>
+        <slot name="title" />
         <div class="avatar-upload-close" @click="Props.onClose">
           <svg t="1649489376154" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2215" width="16" height="16"><path d="M184.64768 836.34176c3.9936 3.9936 9.23648 5.98016 14.47936 5.98016 5.24288 0 10.48576-2.00704 14.49984-6.00064l292.70016-293.04832 292.70016 293.04832c3.9936 4.01408 9.23648 6.00064 14.49984 6.00064 5.24288 0 10.48576-2.00704 14.47936-5.98016 8.00768-7.9872 8.00768-20.95104 0.02048-28.95872L535.61344 514.64192 828.0064 221.92128c7.9872-8.00768 7.9872-20.97152-0.02048-28.95872-8.02816-8.00768-20.97152-8.00768-28.95872 0.02048L506.30656 486.03136 213.6064 192.98304c-8.00768-8.00768-20.97152-8.00768-28.95872-0.02048-8.00768 7.9872-8.00768 20.95104-0.02048 28.95872l292.37248 292.72064L184.6272 807.38304C176.64 815.37024 176.64 828.35456 184.64768 836.34176z" fill="" p-id="2216" /></svg>
         </div>
@@ -25,17 +26,19 @@
           <div class="avatar-upload-operation">
             <span style="cursor: pointer;" @click="file.click()">更换头像</span>
             <span style="cursor: pointer;" class="upload-operation-close" @click="updateRotate">
-              <svg t="1649489582570" class="icon-rotate" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3047" width="16" height="16"><path d="M503.466667 285.866667L405.333333 226.133333c-8.533333-8.533333-12.8-21.333333-8.533333-29.866666 8.533333-8.533333 21.333333-12.8 29.866667-8.533334l145.066666 89.6c8.533333 4.266667 12.8 17.066667 8.533334 29.866667l-89.6 145.066667c-4.266667 8.533333-17.066667 12.8-29.866667 8.533333-8.533333-4.266667-12.8-17.066667-8.533333-29.866667l64-102.4c-123.733333 4.266667-226.133333 106.666667-226.133334 234.666667s106.666667 234.666667 234.666667 234.666667c85.333333 0 162.133333-46.933333 204.8-119.466667 4.266667-8.533333 17.066667-12.8 29.866667-8.533333 8.533333 4.266667 12.8 17.066667 8.533333 29.866666-51.2 85.333333-140.8 140.8-238.933333 140.8-153.6 0-277.333333-123.733333-277.333334-277.333333 0-145.066667 110.933333-264.533333 251.733334-277.333333z" p-id="3048" /></svg>
-              <span>旋转90度</span>
+              <template v-if="Props.rotate">
+                <svg t="1649489582570" class="icon-rotate" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3047" width="16" height="16"><path d="M503.466667 285.866667L405.333333 226.133333c-8.533333-8.533333-12.8-21.333333-8.533333-29.866666 8.533333-8.533333 21.333333-12.8 29.866667-8.533334l145.066666 89.6c8.533333 4.266667 12.8 17.066667 8.533334 29.866667l-89.6 145.066667c-4.266667 8.533333-17.066667 12.8-29.866667 8.533333-8.533333-4.266667-12.8-17.066667-8.533333-29.866667l64-102.4c-123.733333 4.266667-226.133333 106.666667-226.133334 234.666667s106.666667 234.666667 234.666667 234.666667c85.333333 0 162.133333-46.933333 204.8-119.466667 4.266667-8.533333 17.066667-12.8 29.866667-8.533333 8.533333 4.266667 12.8 17.066667 8.533333 29.866666-51.2 85.333333-140.8 140.8-238.933333 140.8-153.6 0-277.333333-123.733333-277.333334-277.333333 0-145.066667 110.933333-264.533333 251.733334-277.333333z" p-id="3048" /></svg>
+                <span>旋转90度</span>
+              </template>
             </span>
           </div>
         </div>
         <div class="avatar-upload-preview">
-          <span>头像预览</span>
+          <span>预览</span>
           <div class="preview-radius border-3-white" :style="previewBoxSizeStyle">
             <img :src="avatar" alt="" :style="previewImgStyle" @dragstart.prevent="" @select.prevent="">
           </div>
-          <div class="preview-square" :style="previewBoxSizeStyle">
+          <div class="preview-square border-3-white" :style="previewBoxSizeStyle">
             <img :src="avatar" alt="" :style="previewImgStyle" @dragstart.prevent="" @select.prevent="">
           </div>
         </div>
@@ -57,16 +60,35 @@
 
 <script setup lang="ts" >
 import type { ComputedRef, Ref, StyleValue } from 'vue'
-import { computed, nextTick, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, useSlots, watch } from 'vue'
 import { createCutImg, getBase64, getRange, uploadFile } from './utils'
 import type { MRef, RefElement, Size, SizeStyle } from './type'
 import { useBackImgOperate, useSelectOperate } from './useOperate'
 interface AvatarUploadProps {
+  /**
+   * @description 初始图像src
+   */
   avatar?: string
+  /**
+   * @description 图片上传地址
+   */
   url: string
+  /**
+   * @description 图片上传字段名
+   */
   field?: string
-  headers?: Record<string, any>
-  data?: Record<string, any>
+  /**
+   * @description 图片上传格式
+   */
+  format?: string
+  /**
+   * @description 上传携带请求头
+   */
+  headers?: Record<string, string>
+  /**
+   * @description 上传携带其他数据
+   */
+  data?: Record<string, string>
   /**
    * @description 初始宽度
    */
@@ -75,15 +97,49 @@ interface AvatarUploadProps {
    * @description 初始长度
    */
   height?: number
+  /**
+   * @description  选择框初始大小
+   */
   selectSize?: number
+  /**
+   * @description 是否携带cookie
+   */
   withCredentials?: boolean
-  method?: 'post' | 'get'
+  /**
+   * @description 上传方法
+   */
+  method?: 'POST' | 'GET'
+  /**
+   * @description 接受的文件类型
+   */
   accept?: string
+  /**
+   * @description 是否可以旋转
+   */
+  rotate?: boolean
+  /**
+   * @description 是否fixed
+   */
   fixed?: boolean
-  customRequest?: (file: File) => void
-  befoureUpload?: (file: File) => boolean | Promise<boolean>
+  /**
+   * @description 自定义上传
+   */
+  onCustomRequest?: (file: File) => void
+  /**
+   * @description 上传前钩子 返回false可以阻止上传
+   */
+  onBefoureUpload?: (file: File) => boolean | Promise<boolean>
+  /**
+   * @description 上传成功钩子
+   */
   onSuccess?: (file: File, respose: any) => void
+  /**
+   * @description 上传失败钩子
+   */
   onError?: (file: File, err: Error) => void
+  /**
+   * @description 点击关闭按钮
+   */
   onClose?: () => void
 }
 const Props = withDefaults(defineProps<AvatarUploadProps>(), {
@@ -93,13 +149,13 @@ const Props = withDefaults(defineProps<AvatarUploadProps>(), {
   withCredentials: false,
   selectSize: 300,
   accept: 'image/*',
-  method: 'post',
+  method: 'POST',
   fixed: true,
+  rotate: true,
+  format: 'png',
 })
 const PREVIEW_ZOOM = 0.65
-// const Emits = defineEmits<{
-//   (e: 'customUpload', file: File): void
-// }>()
+const slots = useSlots()
 const avatar: Ref<string> = ref(Props.avatar)
 // 编辑框尺寸不是响应式的
 const { width: editBoxWidth, height: editBoxHeight, selectSize: initSelectSize } = Props
@@ -212,15 +268,16 @@ function changeFile(e: Event) {
 async function upload() {
   const formData = new FormData()
   const blob = await getImgData()
+  const format = Props.format
   formData.append(Props.field, blob)
-  const file = new File([blob], 'avatar.png', { type: 'image/png' })
+  const file = new File([blob], `avatar.${format}`, { type: `image/${format}` })
   avatar.value = await getBase64(blob)
-  if (Props.customRequest) {
-    await Props.customRequest(file)
+  if (Props.onCustomRequest) {
+    await Props.onCustomRequest(file)
     return
   }
-  if (Props.befoureUpload) {
-    const result = await Props.befoureUpload(file)
+  if (Props.onBefoureUpload) {
+    const result = await Props.onBefoureUpload(file)
     if (!result)
       return
   }
@@ -244,7 +301,7 @@ function getImgData() {
     height: imgSize.height,
     zoom: bgImgZoom.value,
   })
-  return cutImg(avatar.value, range)
+  return cutImg(avatar.value, range, Props.format)
 }
 
 </script>
@@ -362,9 +419,10 @@ function getImgData() {
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  background-color: #939393;
-  padding: 10px;
+  background: #f2f2f2;
+  padding:0 10px;
   margin-bottom: 20px;
+  font-size: 14px;
 }
 .preview-radius{
   border-radius: 50%;

@@ -19,7 +19,7 @@ export function getRange(select: Rectangle, target: Rectangle): Range {
 export function createCutImg() {
   const canvas = document.createElement('canvas')
   const contex = canvas.getContext('2d')!
-  return function cutImg(url: string, range: Range): Promise<Blob> {
+  return function cutImg(url: string, range: Range, format = 'png'): Promise<Blob> {
     const { sx, sy, sw, sh } = range
     return new Promise((resolve, reject) => {
       const img = new Image()
@@ -34,7 +34,7 @@ export function createCutImg() {
             resolve(blob)
           reject(new Error('canvas to blob error'))
           contex.restore()
-        })
+        }, format)
       }
       img.onerror = (e) => {
         reject(e)

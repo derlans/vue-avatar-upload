@@ -7,12 +7,14 @@ const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
 
 <template>
   <div>
-    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :width="200" :height="200" :select-size="100" :on-close="()=>{show=false}" :fixed="false" style="height: 1000px;">
+    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :width="200" :height="200" :select-size="100" :fixed="false" style="height: 1000px;" @close="()=>{show=false}">
       <template #close>
-        取消
+        <button style="margin-right: 10px;">
+          取消
+        </button>
       </template>
       <template #upload>
-        上传
+        <button>上传</button>
       </template>
     </AvatarUpload>
   </div>
