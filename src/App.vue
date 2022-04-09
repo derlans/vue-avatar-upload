@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AvatarUpload from '../packages/src/index.vue'
-const avatar = 'https://scpic.chinaz.net/files/pic/pic6/pic1281.jpg'
+const show = ref(true)
+const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
 </script>
 
 <template>
-  <div style="width: 550px;height: 550px;margin: 0 auto;margin-top: 200px;">
-    <AvatarUpload :avatar="avatar" />
+  <div>
+    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :width="200" :height="200" :select-size="100" :on-close="()=>{show=false}" :fixed="false" style="height: 1000px;">
+      <template #close>
+        取消
+      </template>
+      <template #upload>
+        上传
+      </template>
+    </AvatarUpload>
   </div>
+  <div>1111</div>
 </template>
 
 <style>

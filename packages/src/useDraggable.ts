@@ -2,6 +2,7 @@ import type { ComputedRef, Ref } from 'vue'
 import { computed, ref } from 'vue'
 import type { PositionStyle } from './type'
 import { useEventListener } from './useEventListener'
+import { isMobile } from './utils'
 export interface UseDraggableOptions{
   draggingBox?: Ref<HTMLElement | SVGElement | Document | null>
   range?: {
@@ -15,11 +16,12 @@ export interface UseDraggableOptions{
     }
   }
   stop?: boolean
+  preventDefault?: boolean
 }
-export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, options: UseDraggableOptions = { stop: false }) {
+export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, options: UseDraggableOptions = { stop: false, preventDefault: false }) {
   const draggingBox = options.draggingBox ?? ref(document)
-  const range = options.range
-  const stop = options.stop
+  const { stop, preventDefault, range = {} } = options
+  const _isMobile = isMobile()
   const x = ref(0)
   const y = ref(0)
   const isDraging = ref(false)
@@ -27,23 +29,48 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     x: 0,
     y: 0,
   }
-  function updateStartPostion(e: MouseEvent) {
+  function handelEvent(e: Event) {
     if (stop)
       e.stopPropagation()
-    startPostion.x = e.x
-    startPostion.y = e.y
+    if (preventDefault)
+      e.preventDefault()
   }
-  const start = (e: MouseEvent) => {
+  const prevenMtobileTouch = (e: Event) => {
+    e.preventDefault()
+  }
+  function updateStartPostion(e: MouseEvent| TouchEvent) {
+    if (_isMobile) {
+      const _e = e as TouchEvent
+      startPostion.x = _e.touches[0].clientX
+      startPostion.y = _e.touches[0].clientY
+    }
+    else {
+      const _e = e as MouseEvent
+      startPostion.x = _e.x
+      startPostion.y = _e.y
+    }
+  }
+  const start = (e: MouseEvent| TouchEvent) => {
+    handelEvent(e)
     isDraging.value = true
     updateStartPostion(e)
+    if (_isMobile)
+      document.addEventListener('touchmove', prevenMtobileTouch, { passive: false })
   }
-  const move = (e: MouseEvent) => {
-    if (!isDraging.value) {
-      updateStartPostion(e)
+  const move = (e: MouseEvent| TouchEvent) => {
+    handelEvent(e)
+    if (!isDraging.value)
       return
+    if (_isMobile) {
+      const _e = e as TouchEvent
+      x.value += _e.touches[0].clientX - startPostion.x
+      y.value += _e.touches[0].clientY - startPostion.y
     }
-    x.value += e.x - startPostion.x
-    y.value += e.y - startPostion.y
+    else {
+      const _e = e as MouseEvent
+      x.value += _e.x - startPostion.x
+      y.value += _e.y - startPostion.y
+    }
     if (range) {
       if (range.x?.min !== undefined && (x.value < range.x.min))
         x.value = range.x.min
@@ -56,9 +83,11 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     }
     updateStartPostion(e)
   }
-  const end = (e: MouseEvent) => {
+  const end = (e: MouseEvent | TouchEvent) => {
+    handelEvent(e)
+    if (_isMobile)
+      document.removeEventListener('touchmove', prevenMtobileTouch)
     isDraging.value = false
-    updateStartPostion(e)
   }
   const style: ComputedRef<PositionStyle> = computed(() => {
     return {
@@ -66,10 +95,16 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
       left: `${x.value}px`,
     }
   })
-  useEventListener(target, 'mousedown', start as any)
-  useEventListener(draggingBox, 'mousemove', move as any)
-  useEventListener(draggingBox, 'mouseup', end as any)
-
+  if (_isMobile) {
+    useEventListener(target, 'touchstart', start as any)
+    useEventListener(draggingBox, 'touchmove', move as any)
+    useEventListener(draggingBox, 'touchend', end as any)
+  }
+  else {
+    useEventListener(target, 'mousedown', start as any)
+    useEventListener(draggingBox, 'mousemove', move as any)
+    useEventListener(draggingBox, 'mouseup', end as any)
+  }
   return {
     x,
     y,

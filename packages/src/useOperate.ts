@@ -1,26 +1,31 @@
-import type { ComputedRef, StyleValue } from 'vue'
+import type { ComputedRef, Ref, StyleValue } from 'vue'
 import { computed, ref, watch } from 'vue'
-import { getProjectionLength } from './help'
-import type { RefElement, Size } from './type'
+import { getProjectionLength } from './utils'
+import type { RefElement, Rotate, Size } from './type'
 import { useDraggable } from './useDraggable'
 import { useWheel } from './useWheel'
-
+const WHEEL_ZOOM = 0.02
+// 背景图片操作 包括拖拽、缩放、旋转
 export function useBackImgOperate(editBox: RefElement, imgSize: Size) {
   // 图片滚轮调整大小
-  const { wheel } = useWheel(editBox)
-  const bgImgZoom = computed(() => {
-    return -wheel.value / 20 + 1 > 0 ? -wheel.value / 20 + 1 : 0
-  })
+  useWheel(editBox, updateBgImgZoom)
+  const bgImgZoom = ref(1)
+  function updateBgImgZoom(delta: number) {
+    bgImgZoom.value += delta > 0 ? WHEEL_ZOOM : -WHEEL_ZOOM
+  }
   // 旋转角度
-  const imgRotate = ref(0)
+  const imgRotate: Ref<Rotate> = ref(0)
   function updateRotate() {
-    imgRotate.value = (imgRotate.value + 90) % 360
+    imgRotate.value = (imgRotate.value + 90) % 360 as Rotate
   }
   // 拖动图片
-  const { style: editPositionStyle, x: baImgX, y: baImgY } = useDraggable(editBox)
+  const { style: editPositionStyle, x: baImgX, y: baImgY } = useDraggable(editBox, {
+    stop: true,
+    preventDefault: false,
+  })
   const bgImgStyle = computed(() => {
     return {
-      ...(editPositionStyle.value as object),
+      ...editPositionStyle.value,
       width: `${imgSize.width * bgImgZoom.value}px`,
       height: `${imgSize.height * bgImgZoom.value}px`,
       transform: `rotate(${imgRotate.value}deg)`,
@@ -42,6 +47,7 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
   // 监听resize按钮移动
   const { x: resizeX, y: resizeY } = useDraggable(resize, {
     stop: true,
+    preventDefault: false,
   })
   // 限制范围
   const selectRange = {
@@ -62,6 +68,7 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
   // 拖动选框
   const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(select, {
     stop: true,
+    preventDefault: false,
     range: selectRange,
   })
   // 选框大小位置style
@@ -83,8 +90,9 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
   watch([resizeX, resizeY], (newV, oldV) => {
     const sizeChangeX = newV[0] - oldV[0]
     const sizeChangeY = newV[1] - oldV[1]
-    const sizeChange = parseFloat(getProjectionLength([sizeChangeX, sizeChangeY], [1, 1]).toFixed(1))
-    selectBoxSize.value = Math.abs(selectBoxSize.value + sizeChange * 1.1)
+    const sizeChange = getProjectionLength([sizeChangeX, sizeChangeY], [1, 1])
+    selectBoxSize.value = selectBoxSize.value + sizeChange
+    selectBoxSize.value = selectBoxSize.value <= 0 ? 0 : selectBoxSize.value
     updateSelectSize()
     updateSelectRange()
   })
