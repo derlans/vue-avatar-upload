@@ -7,7 +7,7 @@ const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
 
 <template>
   <div>
-    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :width="200" :height="200" :select-size="100" :fixed="false" style="height: 1000px;" @close="()=>{show=false}">
+    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :width="500" :height="500" :select-size="800" :preview-size="200" :fixed="true" style="height: 1000px;" @close="()=>{show=false}">
       <template #close>
         <button style="margin-right: 10px;">
           取消

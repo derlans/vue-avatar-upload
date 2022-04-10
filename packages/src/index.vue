@@ -1,13 +1,15 @@
 <template>
-  <div :class="{'avatar-upload-fade':Props.fixed}">
+  <div :class="{'avatar-upload-root':true,'avatar-upload-root-fixed' : Props.fixed}">
+    <div :class="{'avatar-upload-fade':Props.fixed}" />
     <div :class="{'avatar-upload':true,'avatar-upload-fixed':Props.fixed}">
       <div class="avatar-upload-header">
         <div v-if="!slots.title" class="avatar-upload-title">
-          编辑头像
+          {{ defaultI18.title }}
         </div>
         <slot name="title" />
         <div class="avatar-upload-close" @click="Props.onClose">
-          <svg t="1649489376154" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2215" width="16" height="16"><path d="M184.64768 836.34176c3.9936 3.9936 9.23648 5.98016 14.47936 5.98016 5.24288 0 10.48576-2.00704 14.49984-6.00064l292.70016-293.04832 292.70016 293.04832c3.9936 4.01408 9.23648 6.00064 14.49984 6.00064 5.24288 0 10.48576-2.00704 14.47936-5.98016 8.00768-7.9872 8.00768-20.95104 0.02048-28.95872L535.61344 514.64192 828.0064 221.92128c7.9872-8.00768 7.9872-20.97152-0.02048-28.95872-8.02816-8.00768-20.97152-8.00768-28.95872 0.02048L506.30656 486.03136 213.6064 192.98304c-8.00768-8.00768-20.97152-8.00768-28.95872-0.02048-8.00768 7.9872-8.00768 20.95104-0.02048 28.95872l292.37248 292.72064L184.6272 807.38304C176.64 815.37024 176.64 828.35456 184.64768 836.34176z" fill="" p-id="2216" /></svg>
+          <slot name="closeIcon" />
+          <svg v-if="!slots.closeIcon" t="1649489376154" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2215" width="16" height="16"><path d="M184.64768 836.34176c3.9936 3.9936 9.23648 5.98016 14.47936 5.98016 5.24288 0 10.48576-2.00704 14.49984-6.00064l292.70016-293.04832 292.70016 293.04832c3.9936 4.01408 9.23648 6.00064 14.49984 6.00064 5.24288 0 10.48576-2.00704 14.47936-5.98016 8.00768-7.9872 8.00768-20.95104 0.02048-28.95872L535.61344 514.64192 828.0064 221.92128c7.9872-8.00768 7.9872-20.97152-0.02048-28.95872-8.02816-8.00768-20.97152-8.00768-28.95872 0.02048L506.30656 486.03136 213.6064 192.98304c-8.00768-8.00768-20.97152-8.00768-28.95872-0.02048-8.00768 7.9872-8.00768 20.95104-0.02048 28.95872l292.37248 292.72064L184.6272 807.38304C176.64 815.37024 176.64 828.35456 184.64768 836.34176z" fill="" p-id="2216" /></svg>
         </div>
       </div>
       <div class="avatar-upload-main">
@@ -24,17 +26,17 @@
             <img ref="bgAvatar" :src="avatar" alt="" :style="bgImgStyle" class="edit-bg" @dragstart.prevent="" @select.prevent="">
           </div>
           <div class="avatar-upload-operation">
-            <span style="cursor: pointer;" @click="file.click()">更换头像</span>
+            <span style="cursor: pointer;" @click="file.click()">{{ defaultI18.changeAvatar }}</span>
             <span style="cursor: pointer;" class="upload-operation-close" @click="updateRotate">
               <template v-if="Props.rotate">
                 <svg t="1649489582570" class="icon-rotate" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3047" width="16" height="16"><path d="M503.466667 285.866667L405.333333 226.133333c-8.533333-8.533333-12.8-21.333333-8.533333-29.866666 8.533333-8.533333 21.333333-12.8 29.866667-8.533334l145.066666 89.6c8.533333 4.266667 12.8 17.066667 8.533334 29.866667l-89.6 145.066667c-4.266667 8.533333-17.066667 12.8-29.866667 8.533333-8.533333-4.266667-12.8-17.066667-8.533333-29.866667l64-102.4c-123.733333 4.266667-226.133333 106.666667-226.133334 234.666667s106.666667 234.666667 234.666667 234.666667c85.333333 0 162.133333-46.933333 204.8-119.466667 4.266667-8.533333 17.066667-12.8 29.866667-8.533333 8.533333 4.266667 12.8 17.066667 8.533333 29.866666-51.2 85.333333-140.8 140.8-238.933333 140.8-153.6 0-277.333333-123.733333-277.333334-277.333333 0-145.066667 110.933333-264.533333 251.733334-277.333333z" p-id="3048" /></svg>
-                <span>旋转90度</span>
+                <span>{{ defaultI18.rotate }}</span>
               </template>
             </span>
           </div>
         </div>
-        <div class="avatar-upload-preview">
-          <span>预览</span>
+        <div v-if="Props.showPreview" class="avatar-upload-preview">
+          <span>{{ defaultI18.preview }}</span>
           <div class="preview-radius border-3-white" :style="previewBoxSizeStyle">
             <img :src="avatar" alt="" :style="previewImgStyle" @dragstart.prevent="" @select.prevent="">
           </div>
@@ -61,9 +63,10 @@
 <script setup lang="ts" >
 import type { ComputedRef, Ref, StyleValue } from 'vue'
 import { computed, nextTick, reactive, ref, useSlots, watch } from 'vue'
-import { createCutImg, getBase64, getRange, uploadFile } from './utils'
+import { createCutImg, getRange, uploadFile } from './utils'
 import type { MRef, RefElement, Size, SizeStyle } from './type'
 import { useBackImgOperate, useSelectOperate } from './useOperate'
+import i18 from './i18.json'
 interface AvatarUploadProps {
   /**
    * @description 初始图像src
@@ -122,6 +125,24 @@ interface AvatarUploadProps {
    */
   fixed?: boolean
   /**
+   * @description 是否展示预览
+   */
+  showPreview?: boolean
+  /**
+   * @description 预览框大小
+   */
+  previewSize?: number
+  /**
+   * @description 自定义文字
+   */
+  i18?: {
+    title: string
+    changeAvatar: string
+    rotate: string
+    preview: string
+  }
+  lang?: string
+  /**
    * @description 自定义上传
    */
   onCustomRequest?: (file: File) => void
@@ -153,12 +174,17 @@ const Props = withDefaults(defineProps<AvatarUploadProps>(), {
   fixed: true,
   rotate: true,
   format: 'png',
+  lang: 'zh-CN',
+  showPreview: true,
+  previewSize: 100,
 })
-const PREVIEW_ZOOM = 0.65
+const defaultI18 = (Props.i18 || i18[Props.lang] || i18['zh-CN']) as typeof Props.i18
+const PREVIEW_ZOOM = 0.5
 const slots = useSlots()
 const avatar: Ref<string> = ref(Props.avatar)
 // 编辑框尺寸不是响应式的
-const { width: editBoxWidth, height: editBoxHeight, selectSize: initSelectSize } = Props
+const { width: editBoxWidth, height: editBoxHeight, selectSize, previewSize } = Props
+const initSelectSize = selectSize < Math.min(Props.width, Props.height) ? selectSize : Math.min(Props.width, Props.height)
 // 编辑器尺寸style
 const editBoxSizeStyle: SizeStyle = {
   width: `${editBoxWidth}px`,
@@ -236,13 +262,13 @@ const selsctImgStyle: ComputedRef<StyleValue> = computed(() => {
 })
 const previewBoxSizeStyle: ComputedRef<StyleValue> = computed(() => {
   return {
-    width: `${initSelectSize * PREVIEW_ZOOM}px`,
-    height: `${initSelectSize * PREVIEW_ZOOM}px`,
+    width: `${previewSize}px`,
+    height: `${previewSize}px`,
   }
 })
 // 预览图片的样式
 const previewImgStyle: ComputedRef<StyleValue> = computed(() => {
-  const zoom = initSelectSize * PREVIEW_ZOOM / selectBoxSize.value
+  const zoom = previewSize / selectBoxSize.value
   return {
     width: `${imgSize.width * zoom * bgImgZoom.value}px`,
     height: `${imgSize.height * zoom * bgImgZoom.value}px`,
@@ -271,7 +297,6 @@ async function upload() {
   const format = Props.format
   formData.append(Props.field, blob)
   const file = new File([blob], `avatar.${format}`, { type: `image/${format}` })
-  avatar.value = await getBase64(blob)
   if (Props.onCustomRequest) {
     await Props.onCustomRequest(file)
     return
@@ -307,24 +332,35 @@ function getImgData() {
 </script>
 
 <style scoped >
+.avatar-upload-root{
+  --fixed-fade-z-index: 999;
+  --fixed-main-z-index: 1000;
+}
+.avatar-upload-root-fixed{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
 .avatar-upload-fade {
   position: fixed;
-  width: 100vw;
-  height: 100vh;
-  top: 0;
+  bottom: 0;
   left: 0;
+  right: 0;
+  top: 0;
   background: rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  z-index: var(--fixed-z-index);
 }
 .avatar-upload{
   border-radius: 10px;
   background-color: #fff;
   padding: 5px 15px;
   user-select: none;
-  z-index: 3;
+  z-index: var(--fixed-main-z-index);
 }
 .avatar-upload-fixed{
   position: fixed;

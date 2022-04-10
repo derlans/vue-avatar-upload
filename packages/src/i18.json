@@ -1,7 +1,20 @@
 {
-  "CN":{
+  "zh-CN":{
     "title":"编辑头像",
     "changeAvatar":"更换头像",
-    "rotate":"旋转90度"
+    "rotate":"旋转90度",
+    "preview":"预览"
+  },
+  "zh-TW":{
+    "title":"編輯頭像",
+    "changeAvatar":"更換頭像",
+    "rotate":"旋轉90度",
+    "preview":"預覽"
+  },
+  "en":{
+    "title":"Edit Avatar",
+    "changeAvatar":"Change Avatar",
+    "rotate":"Rotate 90°",
+    "preview":"Preview"
   }
 }
