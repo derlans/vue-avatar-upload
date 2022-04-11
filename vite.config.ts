@@ -1,23 +1,54 @@
 import { resolve } from 'path'
+import type { BuildOptions } from 'vite'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 function pathResolve(dir: string) {
   return resolve(process.cwd(), '.', dir)
 }
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: [
-      {
-        find: /\/#\//,
-        replacement: `${pathResolve('types')}/`,
+const buildConfig: Record<string, BuildOptions> = {
+  production: {
+    outDir: 'lib',
+    lib: {
+      entry: pathResolve('main.ts'), // 入口文件
+      name: 'vue-avatar-upload', // 打包后的文件名
+    },
+    rollupOptions: {
+      // 确保外部化处理那些你不想打包进库的依赖
+      external: ['vue'],
+      output: {
+      // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
+        globals: {
+          vue: 'Vue',
+        },
       },
-      {
-        find: '@',
-        replacement: `${pathResolve('src')}/`,
-      },
-    ],
-    dedupe: ['vue'],
+    },
   },
-})
+  preview: {
+    outDir: 'demo',
+    rollupOptions: {
+      input: pathResolve('index.html'),
+    },
+
+  },
+}
+// https://vitejs.dev/config/
+export default ({ mode }) => {
+  return defineConfig({
+    plugins: [vue()],
+    base: './',
+    resolve: {
+      alias: [
+        {
+          find: /\/#\//,
+          replacement: `${pathResolve('types')}/`,
+        },
+        {
+          find: '@',
+          replacement: `${pathResolve('src')}/`,
+        },
+      ],
+      dedupe: ['vue'],
+    },
+    build: buildConfig[mode],
+  })
+}

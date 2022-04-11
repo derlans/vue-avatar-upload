@@ -1,14 +1,31 @@
 {
   "name": "vue-avatar-upload",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "private": false,
+  "description": "A vue3 ts base component for avatar upload and crop",
+  "keywords": [
+    "vue",
+    "vue3",
+    "avatar",
+    "upload",
+    "edit-avatar",
+    "ts"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "derlan"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/derlans/vue-avatar-upload"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vite build --mode production",
+    "build:preview": "vite build --mode preview",
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.19.4",
@@ -17,6 +34,7 @@
     "eslint": "^8.12.0",
     "typescript": "^4.5.4",
     "vite": "^2.9.0",
+    "vue": "^3.2.25",
     "vue-tsc": "^0.29.8"
   }
 }
