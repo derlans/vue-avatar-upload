@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import type { BuildOptions } from 'vite'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import dts from 'vite-plugin-dts'
 function pathResolve(dir: string) {
   return resolve(process.cwd(), '.', dir)
 }
@@ -10,7 +11,8 @@ const buildConfig: Record<string, BuildOptions> = {
     outDir: 'lib',
     lib: {
       entry: pathResolve('src/index.ts'), // 入口文件
-      name: 'vue-avatar-upload', // 打包后的文件名
+      name: 'lib',
+      fileName: format => `index.${format}.js`, // 文件名
     },
     rollupOptions: {
       // 确保外部化处理那些你不想打包进库的依赖
@@ -34,7 +36,7 @@ const buildConfig: Record<string, BuildOptions> = {
 // https://vitejs.dev/config/
 export default ({ mode }) => {
   return defineConfig({
-    plugins: [vue()],
+    plugins: [vue(), dts()],
     base: './',
     resolve: {
       alias: [

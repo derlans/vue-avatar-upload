@@ -15,7 +15,7 @@
     "paths": {
       "@/*": ["src/*"],
       "/#/*": ["types/*"]
-    }
+    },
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "preview/*.ts", "preview/*.vue"],
   "references": [{ "path": "./tsconfig.node.json" }]
