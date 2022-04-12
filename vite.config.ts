@@ -9,7 +9,7 @@ const buildConfig: Record<string, BuildOptions> = {
   production: {
     outDir: 'lib',
     lib: {
-      entry: pathResolve('main.ts'), // 入口文件
+      entry: pathResolve('src/index.ts'), // 入口文件
       name: 'vue-avatar-upload', // 打包后的文件名
     },
     rollupOptions: {

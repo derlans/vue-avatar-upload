@@ -3,18 +3,24 @@
     "title":"编辑头像",
     "changeAvatar":"更换头像",
     "rotate":"旋转90度",
-    "preview":"预览"
+    "preview":"预览",
+    "cancel":"取消",
+    "confirm":"确定"
   },
   "zh-TW":{
     "title":"編輯頭像",
     "changeAvatar":"更換頭像",
     "rotate":"旋轉90度",
-    "preview":"預覽"
+    "preview":"預覽",
+    "cancel":"取消",
+    "confirm":"確定"
   },
   "en":{
     "title":"Edit Avatar",
     "changeAvatar":"Change Avatar",
     "rotate":"Rotate 90°",
-    "preview":"Preview"
+    "preview":"Preview",
+    "cancel":"Cancel",
+    "confirm":"Confirm"
   }
 }

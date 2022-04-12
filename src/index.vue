@@ -47,13 +47,19 @@
       </div>
       <div class="avatar-upload-actions">
         <div @click="Props.onClose">
-          <slot name="close" />
+          <div v-if="!slots.cancel" class="avatar-button -regular">
+            {{ defaultI18.cancel }}
+          </div>
+          <slot name="cancel" />
         </div>
         <div @click="upload">
-          <slot name="upload" />
+          <div v-if="!slots.confirm" class="avatar-button -salmon">
+            {{ defaultI18.confirm }}
+          </div>
+          <slot name="confirm" />
         </div>
       </div>
-      <div v-show="false" class="avatar-upload-form">
+      <div v-show="false">
         <input ref="file" type="file" :name="Props.field" :accept="Props.accept" @input="changeFile">
       </div>
     </div>
@@ -72,6 +78,8 @@ interface I18 {
   changeAvatar: string
   rotate: string
   preview: string
+  cancel: string
+  confirm: string
 }
 interface AvatarUploadProps {
   /**
@@ -331,11 +339,12 @@ function getImgData() {
 
 </script>
 
-<style scoped >
-.avatar-upload-root{
+<style scoped  lang="scss" >
+.avatar-upload-root  {
   --fixed-fade-z-index: 999;
   --fixed-main-z-index: 1000;
 }
+
 .avatar-upload-root-fixed{
   position: fixed;
   bottom: 0;
@@ -361,12 +370,13 @@ function getImgData() {
   padding: 5px 15px;
   user-select: none;
   z-index: var(--fixed-main-z-index);
+  .border-3-white{
+    border: 3px solid #fff;
+  }
 }
 .avatar-upload-fixed{
   position: fixed;
-}
-.border-3-white{
-  border: 3px solid#fff;
+  transform: translateY(-50%);
 }
 .avatar-upload-header{
   display: flex;
@@ -375,25 +385,17 @@ function getImgData() {
   height: 48px;
   font-size: 16px;
   font-weight: 700;
+  .avatar-upload-close{
+    font-size: 18px;
+    cursor: pointer;
 }
-.avatar-upload-close{
-  font-size: 18px;
-  cursor: pointer;
+
 }
 .avatar-upload-main{
-  padding: 10px;
-  display: flex;
-  justify-content:center;
-}
-.avatar-upload-edit{
-  position: relative;
-  cursor: move;
-  margin-right: 10px;
-  overflow: hidden;
-  background-image:url('./no.png');
-  background-repeat: repeat;
-}
-.edit-fade{
+    padding: 10px;
+    display: flex;
+    justify-content:center;
+    .edit-fade{
   position: absolute;
   top: 0;
   left: 0;
@@ -402,14 +404,29 @@ function getImgData() {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 3;
 }
-.edit-select{
+}
+.avatar-upload-edit{
+  position: relative;
+  cursor: move;
+  margin-right: 10px;
+  overflow: hidden;
+  background-image:url('./no.png');
+  background-repeat: repeat;
+  .edit-select{
   position: absolute;
   border-radius: 50%;
   cursor: move;
   z-index: 3;
-
+  .select-zoom-point{
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  left: 84%;
+  top: 84%;
+  cursor: se-resize;
 }
-/*  不要让选择框有边框 会影响计算位置 因此另外造一个当边框*/
 .edit-selcet-border{
   position: absolute;
   display: block;
@@ -419,16 +436,6 @@ function getImgData() {
   box-sizing: border-box;
   top: -2px;
   left: -2px;
-}
-.select-zoom-point{
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: #fff;
-  border-radius: 50%;
-  left: 84%;
-  top: 84%;
-  cursor: se-resize;
 }
 .edit-selcet-img-box{
   overflow: hidden;
@@ -450,6 +457,11 @@ function getImgData() {
   z-index: 2;
   cursor: move;
 }
+}
+/*  不要让选择框有边框 会影响计算位置 因此另外造一个当边框*/
+
+}
+
 .avatar-upload-preview{
   display: flex;
   flex-direction: column;
@@ -459,23 +471,22 @@ function getImgData() {
   padding:0 10px;
   margin-bottom: 20px;
   font-size: 14px;
-}
-.preview-radius{
+  .preview-radius{
   border-radius: 50%;
   overflow: hidden;
   position: relative;
-}
-.preview-radius>img{
-  position: absolute;
+  &>img{
+    position: absolute;
+  }
 }
 .preview-square{
   overflow: hidden;
   position: relative;
+    &>img{
+    position: absolute;
+  }
 }
-.preview-square>img{
-  position: absolute;
 }
-
 .avatar-upload-operation{
   display: flex;
   justify-content: space-between;
@@ -497,6 +508,64 @@ function getImgData() {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin:0 10px;
+  .avatar-button {
+  display: flex;
+  overflow: hidden;
   margin: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 150ms linear;
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none !important;
+  text-transform: none;
+  text-transform: capitalize;
+  color: #fff;
+  border: 0 none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  -webkit-appearance: none;
+  -moz-appearance:    none;
+  appearance:         none;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 160px;
+  box-shadow: 2px 5px 10px #e4e4e4;
+  &:hover {
+    transition: all 150ms linear;
+    opacity: .85;
+  }
+  &:active {
+    transition: all 150ms linear;
+    opacity: .75;
+  }
+  &:focus {
+    outline: 1px dotted #959595;
+    outline-offset: -4px;
+  }
+}
+.avatar-button.-regular {
+  color: #202129;
+  background-color: #f2f2f2;
+
+  &:hover {
+    color: #202129;
+    background-color: #e1e2e2;
+    opacity: 1;
+  }
+
+  &:active {
+    background-color: #d5d6d6;
+    opacity: 1;
+  }
+}
+.avatar-button.-salmon {
+  color: #FFFFFF;
+  background: #F32C52;
+}
 }
 </style>
