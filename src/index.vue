@@ -162,11 +162,11 @@ interface AvatarUploadProps {
   /**
    * @description 上传成功钩子
    */
-  onSuccess?: (file: File, respose: any) => void
+  onSuccess?: (respose: any, file: File) => void
   /**
    * @description 上传失败钩子
    */
-  onError?: (file: File, err: Error) => void
+  onError?: (err: Error, file: File) => void
   /**
    * @description 点击关闭按钮
    */
@@ -315,9 +315,9 @@ async function upload() {
       return
   }
   uploadFile(formData, Props.url, Props.method, { headers: Props.headers, data: Props.data, withCredentials: Props.withCredentials }).then((res) => {
-    Props.onSuccess?.(file, res)
+    Props.onSuccess?.(res, file)
   }).catch((err) => {
-    Props?.onError?.(file, err)
+    Props?.onError?.(err, file)
   })
 }
 const cutImg = createCutImg()
@@ -343,6 +343,10 @@ function getImgData() {
 .avatar-upload-root  {
   --fixed-fade-z-index: 999;
   --fixed-main-z-index: 1000;
+  img{
+    max-width: unset;
+    max-height: unset;
+  }
 }
 
 .avatar-upload-root-fixed{
