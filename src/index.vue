@@ -440,6 +440,7 @@ function getImgData() {
   top: -2px;
   left: -2px;
 }
+/*  不要让选择框有边框 会影响计算位置 因此另外造一个当边框*/
 .edit-selcet-img-box{
   overflow: hidden;
   position: absolute;
@@ -453,6 +454,9 @@ function getImgData() {
   display: block;
   position: absolute;
 }
+
+}
+}
 .edit-bg{
   user-select: none;
   display: block;
@@ -460,11 +464,6 @@ function getImgData() {
   z-index: 2;
   cursor: move;
 }
-}
-/*  不要让选择框有边框 会影响计算位置 因此另外造一个当边框*/
-
-}
-
 .avatar-upload-preview{
   display: flex;
   flex-direction: column;
