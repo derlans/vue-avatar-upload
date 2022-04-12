@@ -67,11 +67,11 @@ export function uploadFile(formData: FormData, url: string, method = 'POST', opt
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     const headers = options.headers || {}
+    xhr.open(method, url)
     Object.keys(headers).forEach((key) => {
       xhr.setRequestHeader(key, headers[key])
     })
     xhr.withCredentials = !!options.withCredentials
-    xhr.open(method, url)
     xhr.onload = () => {
       if (xhr.status === 200)
         resolve(xhr.response)
