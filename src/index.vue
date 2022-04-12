@@ -303,7 +303,7 @@ async function upload() {
   const formData = new FormData()
   const blob = await getImgData()
   const format = Props.format
-  formData.append(Props.field, blob)
+  formData.append(Props.field, blob, `avatar.${format}`)
   const file = new File([blob], `avatar.${format}`, { type: `image/${format}` })
   if (Props.onCustomRequest) {
     await Props.onCustomRequest(file)
@@ -380,7 +380,6 @@ function getImgData() {
 }
 .avatar-upload-fixed{
   position: fixed;
-  transform: translateY(-50%);
 }
 .avatar-upload-header{
   display: flex;
