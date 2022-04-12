@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import AvatarUpload from '../src/index'
 const show = ref(true)
 const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
-function handelErr(file: File, err) {
+function handelErr(err: Error) {
   console.log(err)
 }
 </script>
