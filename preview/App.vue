@@ -10,7 +10,7 @@ function handelErr(err: Error) {
 
 <template>
   <div>
-    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :fixed="true" :on-error="handelErr" @close="()=>{show=false}" />
+    <AvatarUpload v-show="show" :headers="{test:'123'}" :avatar="avatar" :url="''" :fixed="true" :on-error="handelErr" @close="()=>{show=false}" />
   </div>
   <div>1111</div>
 </template>
