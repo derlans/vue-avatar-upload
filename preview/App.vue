@@ -3,11 +3,14 @@ import { ref } from 'vue'
 import AvatarUpload from '../src/index'
 const show = ref(true)
 const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
+function handelErr(file: File, err) {
+  console.log(err)
+}
 </script>
 
 <template>
   <div>
-    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :width="200" :height="200" :select-size="100" :preview-size="80" :fixed="true" @close="()=>{show=false}" />
+    <AvatarUpload v-show="show" :avatar="avatar" :url="''" :fixed="true" :on-error="handelErr" @close="()=>{show=false}" />
   </div>
   <div>1111</div>
 </template>
