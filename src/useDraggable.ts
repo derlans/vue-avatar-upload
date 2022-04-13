@@ -15,12 +15,10 @@ export interface UseDraggableOptions{
       max?: number
     }
   }
-  stop?: boolean
-  preventDefault?: boolean
 }
-export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, options: UseDraggableOptions = { stop: false, preventDefault: false }) {
-  const draggingBox = options.draggingBox ?? ref(document)
-  const { stop, preventDefault, range = {} } = options
+export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, options?: UseDraggableOptions) {
+  const draggingBox = options?.draggingBox ?? ref(document)
+  const { range = {} } = options || {}
   const _isMobile = isMobile()
   const x = ref(0)
   const y = ref(0)
@@ -29,16 +27,12 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     x: 0,
     y: 0,
   }
-  function handelEvent(e: Event) {
-    if (stop)
-      e.stopPropagation()
-    if (preventDefault)
-      e.preventDefault()
-  }
   const prevenMtobileTouch = (e: Event) => {
     e.preventDefault()
   }
   function updateStartPostion(e: MouseEvent| TouchEvent) {
+    e.preventDefault()
+    e.stopPropagation()
     if (_isMobile) {
       const _e = e as TouchEvent
       startPostion.x = _e.touches[0].clientX
@@ -50,15 +44,20 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
       startPostion.y = _e.y
     }
   }
-  const start = (e: MouseEvent| TouchEvent) => {
-    handelEvent(e)
+  function start(e: MouseEvent| TouchEvent) {
     isDraging.value = true
     updateStartPostion(e)
-    if (_isMobile)
+    if (_isMobile) {
       document.addEventListener('touchmove', prevenMtobileTouch, { passive: false })
+      draggingBox.value?.addEventListener('touchmove', move as any)
+      draggingBox.value?.addEventListener('touchend', end as any)
+    }
+    else {
+      draggingBox.value?.addEventListener('mousemove', move as any)
+      draggingBox.value?.addEventListener('mouseup', end as any)
+    }
   }
-  const move = (e: MouseEvent| TouchEvent) => {
-    handelEvent(e)
+  function move(e: MouseEvent| TouchEvent) {
     if (!isDraging.value)
       return
     if (_isMobile) {
@@ -83,10 +82,17 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     }
     updateStartPostion(e)
   }
-  const end = (e: MouseEvent | TouchEvent) => {
-    handelEvent(e)
-    if (_isMobile)
+  function end() {
+    if (_isMobile) {
       document.removeEventListener('touchmove', prevenMtobileTouch)
+      draggingBox.value?.removeEventListener('touchmove', move as any)
+      draggingBox.value?.removeEventListener('touchend', end as any)
+    }
+    else {
+      draggingBox.value?.removeEventListener('mousemove', move as any)
+      draggingBox.value?.removeEventListener('mouseup', end as any)
+    }
+
     isDraging.value = false
   }
   const style: ComputedRef<PositionStyle> = computed(() => {
@@ -95,16 +101,11 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
       left: `${x.value}px`,
     }
   })
-  if (_isMobile) {
+  if (_isMobile)
     useEventListener(target, 'touchstart', start as any)
-    useEventListener(draggingBox, 'touchmove', move as any)
-    useEventListener(draggingBox, 'touchend', end as any)
-  }
-  else {
+  else
     useEventListener(target, 'mousedown', start as any)
-    useEventListener(draggingBox, 'mousemove', move as any)
-    useEventListener(draggingBox, 'mouseup', end as any)
-  }
+
   return {
     x,
     y,

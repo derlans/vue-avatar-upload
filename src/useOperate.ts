@@ -19,10 +19,7 @@ export function useBackImgOperate(editBox: RefElement, imgSize: Size) {
     imgRotate.value = (imgRotate.value + 90) % 360 as Rotate
   }
   // 拖动图片
-  const { style: editPositionStyle, x: baImgX, y: baImgY } = useDraggable(editBox, {
-    stop: true,
-    preventDefault: false,
-  })
+  const { style: editPositionStyle, x: baImgX, y: baImgY } = useDraggable(editBox)
   const bgImgStyle = computed(() => {
     return {
       ...editPositionStyle.value,
@@ -45,10 +42,7 @@ export function useBackImgOperate(editBox: RefElement, imgSize: Size) {
 export function useSelectOperate(initSize: number, select: RefElement, resize: RefElement, limitSize: Size) {
   const selectBoxSize = ref(initSize)
   // 监听resize按钮移动
-  const { x: resizeX, y: resizeY } = useDraggable(resize, {
-    stop: true,
-    preventDefault: false,
-  })
+  const { x: resizeX, y: resizeY } = useDraggable(resize)
   // 限制范围
   const selectRange = {
     x: {
@@ -67,8 +61,6 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
   }
   // 拖动选框
   const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(select, {
-    stop: true,
-    preventDefault: true,
     range: selectRange,
   })
   // 选框大小位置style
