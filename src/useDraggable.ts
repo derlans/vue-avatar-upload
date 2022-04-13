@@ -15,10 +15,12 @@ export interface UseDraggableOptions{
       max?: number
     }
   }
+  preventDefault?: boolean
+  stopPropagation?: boolean
 }
 export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, options?: UseDraggableOptions) {
   const draggingBox = options?.draggingBox ?? ref(document)
-  const { range = {} } = options || {}
+  const { range = {}, preventDefault = false, stopPropagation = true } = options || {}
   const _isMobile = isMobile()
   const x = ref(0)
   const y = ref(0)
@@ -31,8 +33,10 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     e.preventDefault()
   }
   function updateStartPostion(e: MouseEvent| TouchEvent) {
-    e.preventDefault()
-    e.stopPropagation()
+    if (stopPropagation)
+      e.stopPropagation()
+    if (preventDefault)
+      e.preventDefault()
     if (_isMobile) {
       const _e = e as TouchEvent
       startPostion.x = _e.touches[0].clientX
@@ -105,7 +109,6 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
     useEventListener(target, 'touchstart', start as any)
   else
     useEventListener(target, 'mousedown', start as any)
-
   return {
     x,
     y,
