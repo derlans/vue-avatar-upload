@@ -1,6 +1,6 @@
 {
   "name": "vue-avatar-upload",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": false,
   "description": "A vue3 ts base component for avatar upload and crop",
   "keywords": [
@@ -38,6 +38,7 @@
     "@types/node": "^17.0.23",
     "@vitejs/plugin-vue": "^2.3.0",
     "eslint": "^8.12.0",
+    "naive-ui": "^2.28.0",
     "sass": "^1.50.0",
     "typescript": "^4.5.4",
     "vite": "^2.9.0",
