@@ -304,6 +304,10 @@ async function upload() {
   const blob = await getImgData()
   const format = Props.format
   formData.append(Props.field, blob, `avatar.${format}`)
+  const data = Props.data || {}
+  Object.keys(data).forEach((key) => {
+    formData.append(key, data[key])
+  })
   const file = new File([blob], `avatar.${format}`, { type: `image/${format}` })
   if (Props.onCustomRequest) {
     await Props.onCustomRequest(file)
@@ -314,7 +318,7 @@ async function upload() {
     if (!result)
       return
   }
-  uploadFile(formData, Props.url, Props.method, { headers: Props.headers, data: Props.data, withCredentials: Props.withCredentials }).then((res) => {
+  uploadFile(formData, Props.url, Props.method, { headers: Props.headers, withCredentials: Props.withCredentials }).then((res) => {
     Props.onSuccess?.(res, file)
   }).catch((err) => {
     Props?.onError?.(err, file)

@@ -63,7 +63,7 @@ export function getProjectionLength(vector: number[], targetVector: number[]) {
 /**
  * @description  上传图片
  */
-export function uploadFile(formData: FormData, url: string, method = 'POST', options: { headers?: Record<string, string> ; data?: Record<string, string> ;withCredentials: boolean }) {
+export function uploadFile(formData: FormData, url: string, method = 'POST', options: { headers?: Record<string, string> ;withCredentials: boolean }) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     const headers = options.headers || {}

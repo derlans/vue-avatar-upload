@@ -68,7 +68,7 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
   // 拖动选框
   const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(select, {
     stop: true,
-    preventDefault: false,
+    preventDefault: true,
     range: selectRange,
   })
   // 选框大小位置style
