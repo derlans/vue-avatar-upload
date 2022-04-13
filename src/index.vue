@@ -89,7 +89,7 @@ interface AvatarUploadProps {
   /**
    * @description 图片上传地址
    */
-  url: string
+  url?: string
   /**
    * @description 图片上传字段名
    */
@@ -173,6 +173,7 @@ interface AvatarUploadProps {
   onClose?: () => void
 }
 const Props = withDefaults(defineProps<AvatarUploadProps>(), {
+  url: '',
   field: 'avatar',
   width: 300,
   height: 300,
