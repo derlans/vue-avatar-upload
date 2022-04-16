@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
-import { NButton, NCard, NCode, NForm, NFormItem, NInput, NInputNumber, NSwitch } from 'naive-ui'
+import { NButton, NCard, NCode, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import AvatarUpload from '../src/index'
 const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
 function handelErr(err: Error) {
@@ -15,15 +15,29 @@ function handelClose() {
 const key = ref(0)
 const Props = reactive({
   avatar,
-  handelErr,
   width: 400,
   height: 400,
   selectSize: 300,
-  previewSize: 200,
+  previewSize: 180,
   showPreview: true,
   rotate: true,
   fixed: false,
+  lang: 'en',
 })
+const langOptions = [
+  {
+    value: 'en',
+    label: 'en',
+  },
+  {
+    value: 'zh-CN',
+    label: '中国内地',
+  },
+  {
+    value: 'zh-TW',
+    label: '中国台湾（台湾是中国的！！！）',
+  },
+]
 </script>
 
 <template>
@@ -44,6 +58,9 @@ const Props = reactive({
         </NFormItem>
         <NFormItem label="Avatar">
           <NInput v-model:value="Props.avatar" style="width: 500px;" />
+        </NFormItem>
+        <NFormItem label="lang">
+          <NSelect v-model:value="Props.lang" style="width: 500px;" :options="langOptions" />
         </NFormItem>
         <NFormItem label="onClose">
           <NCode>
