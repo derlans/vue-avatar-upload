@@ -1,4 +1,5 @@
 # A vue3 ts base component for avatar upload and crop
+![image](https://github.com/derlans/vue-avatar-upload/blob/master/imgs/preview.gif)
 ## how to use
 ##[demo](http://avatar-upload.derlan.top/)
 ### import
@@ -148,3 +149,4 @@ interface I18 {
 ```
 
 ## slots
+![image](https://github.com/derlans/vue-avatar-upload/blob/master/imgs/slots.png)
