@@ -2,6 +2,7 @@
 import { reactive, ref, watch } from 'vue'
 import { NButton, NCard, NCode, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import AvatarUpload from '../src/index'
+import { isMobile } from '@/utils'
 const avatar = 'https://s3.bmp.ovh/imgs/2022/04/08/420ed87efa5616db.png'
 function handelErr(err: Error) {
   alert(err.message)
@@ -13,12 +14,13 @@ function handelClose() {
   alert('click close')
 }
 const key = ref(0)
+const _isMobile = isMobile()
 const Props = reactive({
   avatar,
-  width: 400,
-  height: 400,
-  selectSize: 300,
-  previewSize: 180,
+  width: _isMobile ? 200 : 400,
+  height: _isMobile ? 200 : 400,
+  selectSize: _isMobile ? 100 : 300,
+  previewSize: _isMobile ? 80 : 180,
   showPreview: true,
   rotate: true,
   fixed: false,
@@ -41,7 +43,8 @@ const langOptions = [
 </script>
 
 <template>
-  <div style="display: flex;justify-content: center;align-items: center;width: 100vw;height: 100vh;">
+  <div style="display: flex;justify-content: center;align-items: center;width: 100vw;min-height: 100vh;flex-wrap: wrap;">
+    <AvatarUpload :key="key" v-bind="Props" @close="handelClose" @error="handelErr" @success="handelSuccess" />
     <NCard style="width: 600px;margin: 20px;" title="Props">
       <NForm label-placement="left" label-width="100">
         <NFormItem label="width">
@@ -93,7 +96,6 @@ const langOptions = [
         </div>
       </NForm>
     </NCard>
-    <AvatarUpload :key="key" v-bind="Props" @close="handelClose" @error="handelErr" @success="handelSuccess" />
   </div>
 </template>
 
