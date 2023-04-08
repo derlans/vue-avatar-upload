@@ -68,7 +68,7 @@
 
 <script setup lang="ts" >
 import type { ComputedRef, Ref, StyleValue } from 'vue'
-import { computed, nextTick, reactive, ref, useSlots, watch } from 'vue'
+import { computed, nextTick, reactive, ref, toRef, useSlots, watch } from 'vue'
 import { createCutImg, getRange, uploadFile } from './utils'
 import type { MRef, RefElement, Size, SizeStyle } from './type'
 import { useBackImgOperate, useSelectOperate } from './useOperate'
@@ -135,6 +135,10 @@ interface AvatarUploadProps {
    */
   rotate?: boolean
   /**
+   * @description 是否静止用户操作选择框 whether to still user operation selection box
+   */
+  disableSelect?: boolean
+  /**
    * @description 是否fixed  is fixed
    */
   fixed?: boolean
@@ -176,6 +180,7 @@ interface AvatarUploadProps {
   onClose?: () => void
 }
 const Props = withDefaults(defineProps<AvatarUploadProps>(), {
+  avatar: '',
   url: '',
   field: 'avatar',
   width: 300,
@@ -186,6 +191,7 @@ const Props = withDefaults(defineProps<AvatarUploadProps>(), {
   method: 'POST',
   fixed: true,
   rotate: true,
+  disableSelect: false,
   format: 'png',
   lang: 'zh-CN',
   showPreview: true,
@@ -193,9 +199,9 @@ const Props = withDefaults(defineProps<AvatarUploadProps>(), {
 })
 const defaultI18 = (Props.i18 || i18[Props.lang] || i18['zh-CN']) as I18
 const slots = useSlots()
-const avatar: Ref<string> = ref(Props.avatar || '')
+const avatar: Ref<string> = toRef(Props, 'avatar')
 // 编辑框尺寸不是响应式的
-const { width: editBoxWidth, height: editBoxHeight, selectSize, previewSize } = Props
+const { width: editBoxWidth, height: editBoxHeight, selectSize, previewSize, disableSelect } = Props
 const initSelectSize = selectSize < Math.min(Props.width, Props.height) ? selectSize : Math.min(Props.width, Props.height)
 // 编辑器尺寸style
 const editBoxSizeStyle: SizeStyle = {
@@ -261,7 +267,7 @@ const {
   selectBoxStyle,
   selectX,
   selectY,
-} = useSelectOperate(initSelectSize, select, resize, { width: editBoxWidth, height: editBoxHeight })
+} = useSelectOperate({ initSize: initSelectSize, select, resize, bgBoxSize: { width: editBoxWidth, height: editBoxHeight }, limitSize: { width: editBoxWidth, height: editBoxHeight }, disable: disableSelect })
 // 选择框内图片的样式
 const selsctImgStyle: ComputedRef<StyleValue> = computed(() => {
   return {

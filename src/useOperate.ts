@@ -39,10 +39,19 @@ export function useBackImgOperate(editBox: RefElement, imgSize: Size) {
   }
 }
 
-export function useSelectOperate(initSize: number, select: RefElement, resize: RefElement, limitSize: Size) {
+export interface useSelectOperateProps{
+  initSize: number
+  select: RefElement
+  resize: RefElement
+  limitSize: Size
+  bgBoxSize: Size
+  disable?: boolean
+}
+export function useSelectOperate(props: useSelectOperateProps) {
+  const { initSize, select, resize, limitSize, disable = false, bgBoxSize } = props
   const selectBoxSize = ref(initSize)
   // 监听resize按钮移动
-  const { x: resizeX, y: resizeY } = useDraggable(resize)
+  const { x: resizeX, y: resizeY, clear: clearResize } = useDraggable(resize)
   // 限制范围
   const selectRange = {
     x: {
@@ -60,7 +69,7 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
     selectRange.y.max = limitSize.height - selectBoxSize.value
   }
   // 拖动选框
-  const { style: selectPositionStyle, x: selectX, y: selectY } = useDraggable(select, {
+  const { style: selectPositionStyle, x: selectX, y: selectY, setPosition, clear: clearSelect } = useDraggable(select, {
     range: selectRange,
   })
   // 选框大小位置style
@@ -88,12 +97,14 @@ export function useSelectOperate(initSize: number, select: RefElement, resize: R
     updateSelectSize()
     updateSelectRange()
   })
+  if (disable) {
+    clearResize()
+    clearSelect()
+  }
+  setPosition({ x: (bgBoxSize.height - initSize) / 2, y: (bgBoxSize.width - initSize) / 2 })
   return {
-    resizeX,
-    resizeY,
     selectBoxSize,
     selectBoxStyle,
-    selectPositionStyle,
     selectX,
     selectY,
   }

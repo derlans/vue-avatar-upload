@@ -96,8 +96,11 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
       draggingBox.value?.removeEventListener('mousemove', move as any)
       draggingBox.value?.removeEventListener('mouseup', end as any)
     }
-
     isDraging.value = false
+  }
+  function setPosition(v: { x: number; y: number }) {
+    x.value = v.x
+    y.value = v.y
   }
   const style: ComputedRef<PositionStyle> = computed(() => {
     return {
@@ -105,14 +108,25 @@ export function useDraggable(target: Ref<HTMLElement | SVGElement | null>, optio
       left: `${x.value}px`,
     }
   })
-  if (_isMobile)
-    useEventListener(target, 'touchstart', start as any)
-  else
-    useEventListener(target, 'mousedown', start as any)
+  let clearEventListener = () => {}
+  if (_isMobile) {
+    const v = useEventListener(target, 'touchstart', start as any)
+    clearEventListener = v.clear
+  }
+  else {
+    const v = useEventListener(target, 'mousedown', start as any)
+    clearEventListener = v.clear
+  }
+  function clear() {
+    end()
+    clearEventListener()
+  }
   return {
     x,
     y,
     isDraging,
     style,
+    setPosition,
+    clear,
   }
 }

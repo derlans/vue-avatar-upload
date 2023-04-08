@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, render } from 'vue'
 import { NButton, NCard, NCode, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import AvatarUpload from '../src/index'
 import { isMobile } from '@/utils'
@@ -13,6 +13,7 @@ function handelSuccess(respose: any) {
 function handelClose() {
   alert('click close')
 }
+
 const key = ref(0)
 const _isMobile = isMobile()
 const Props = reactive({
@@ -25,6 +26,7 @@ const Props = reactive({
   rotate: true,
   fixed: false,
   lang: 'en',
+  disableSelect: false,
 })
 const langOptions = [
   {
@@ -40,11 +42,28 @@ const langOptions = [
     label: '中国台湾（台湾是中国的！！！）',
   },
 ]
+function handelUpload(v: File) {
+  v.arrayBuffer().then((v) => {
+    const base64Img = arrayBufferToBase64(v)
+    Props.avatar = base64Img
+  })
+
+  return true
+}
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = ''
+  const bytes = new Uint8Array(buffer)
+  const len = bytes.byteLength
+  for (let i = 0; i < len; i++)
+    binary += String.fromCharCode(bytes[i])
+
+  return `data:image/png;base64,${window.btoa(binary)}`
+}
 </script>
 
 <template>
   <div style="display: flex;justify-content: center;align-items: center;width: 100vw;min-height: 100vh;flex-wrap: wrap;">
-    <AvatarUpload :key="key" v-bind="Props" @close="handelClose" @error="handelErr" @success="handelSuccess" />
+    <AvatarUpload :key="key" v-bind="Props" @custom-request="handelUpload" @close="handelClose" @error="handelErr" @success="handelSuccess" />
     <NCard style="width: 600px;margin: 20px;" title="Props">
       <NForm label-placement="left" label-width="100">
         <NFormItem label="width">
@@ -85,6 +104,9 @@ const langOptions = [
         </NFormItem>
         <NFormItem label="rotate">
           <NSwitch v-model:value="Props.rotate" />
+        </NFormItem>
+        <NFormItem label="disableSelect">
+          <NSwitch v-model:value="Props.disableSelect" @change:value="key++" />
         </NFormItem>
         <NFormItem label="fixed">
           <NSwitch v-model:value="Props.fixed" />
