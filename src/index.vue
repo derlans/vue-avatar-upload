@@ -199,7 +199,11 @@ const Props = withDefaults(defineProps<AvatarUploadProps>(), {
 })
 const defaultI18 = (Props.i18 || i18[Props.lang] || i18['zh-CN']) as I18
 const slots = useSlots()
-const avatar: Ref<string> = toRef(Props, 'avatar')
+const avatar: Ref<string> = ref(Props.avatar)
+watch(() => Props.avatar, (v) => {
+  avatar.value = v
+  initImgSize()
+})
 // 编辑框尺寸不是响应式的
 const { width: editBoxWidth, height: editBoxHeight, selectSize, previewSize, disableSelect } = Props
 const initSelectSize = selectSize < Math.min(Props.width, Props.height) ? selectSize : Math.min(Props.width, Props.height)
@@ -306,6 +310,7 @@ function changeFile(e: Event) {
       avatar.value = url as string
       initImgSize()
     }
+    file.value = ''
   }
   reader.readAsDataURL(file.files![0])
 }
