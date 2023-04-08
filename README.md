@@ -70,6 +70,10 @@ interface AvatarUploadProps {
    */
   accept?: string
   /**
+   * @description 是否静止用户操作选择框 whether to still user operation selection box
+   */
+  disableSelect?: boolean
+  /**
    * @description 是否可以旋转 can rotate
    */
   rotate?: boolean
