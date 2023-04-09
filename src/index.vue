@@ -21,7 +21,7 @@
                 <img :src="avatar" alt="" :style="selsctImgStyle" class="edit-select-img" @dragstart.prevent="" @select.prevent="">
               </span>
               <span class="edit-selcet-border border-3-white" />
-              <span ref="resize" class="select-zoom-point" />
+              <span v-show="!Props.disableSelect" ref="resize" class="select-zoom-point" />
             </div>
             <img ref="bgAvatar" :src="avatar" alt="" :style="bgImgStyle" class="edit-bg" @dragstart.prevent="" @select.prevent="">
           </div>
@@ -355,7 +355,6 @@ function getImgData() {
   })
   return cutImg(avatar.value, range, Props.format)
 }
-
 </script>
 
 <style scoped  lang="scss" >
